@@ -14,7 +14,6 @@ __global__ void sum(float* a, float* b, float* c)
 int main() { 
 
     float *a, *b, *c;
-
     float *d_a, *d_b, *d_c;
 
     float elapsedTime;
@@ -26,8 +25,9 @@ int main() {
         exit(0); 
     }
 
-    for (int threads = 1; threads < 1024; threads <<= 1) {
-        for (int N = 1 << 10; N < (1 << 23); N <<= 1) {
+    for (int N = 1 << 10; N < (1 << 23); N <<= 1) {
+        for (int threads = 1; threads <= 1024; threads <<= 1) {
+
             int block = (N + threads - 1) / threads;
             printf("thread %d N %d block %d\n", threads, N, block);
 

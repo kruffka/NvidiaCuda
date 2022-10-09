@@ -7,11 +7,12 @@ __global__ void gTest(float* a)
 }
 
 int main() {
-    int m, n, k;
-    scanf("%d %d %d", &m, &n, &k);
+    int N = 1 << 19, blocks, threads = 64;\
 
-    float* mas = new float[m];
-    float* da;
+    blocks = (N + threads - 1)/threads;
+
+    float* a = new float[N];
+    float* d_a;
 
     int dev;
     cudaSetDevice(dev); 
@@ -26,19 +27,19 @@ int main() {
     printf(" Maximum number of threads per block: %d\n", deviceProp.maxThreadsPerBlock);
     
    
-    printf("Occupancy: %g\n", (float)(k * 8) / (float)((deviceProp.maxThreadsPerMultiProcessor / deviceProp.warpSize) * deviceProp.warpSize));
+    printf("Occupancy: %g\n", (float)(threads * 8) / (float)((deviceProp.maxThreadsPerMultiProcessor / deviceProp.warpSize) * deviceProp.warpSize));
 
-    cudaMalloc((void**)&da, m * sizeof(float));
-    gTest <<< n, k >>> (da);
+    cudaMalloc((void**)&d_a, N * sizeof(float));
+    gTest <<< blocks, threads >>> (d_a);
     cudaDeviceSynchronize();
-    cudaMemcpy(mas, da, m * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(a, d_a, N * sizeof(float), cudaMemcpyDeviceToHost);
     
-    for(int i = m - 4; i < m; i++)
+    for(int i = N - 4; i < N; i++)
     {
-        printf("%g\n", mas[i]);
+        printf("%g\n", a[i]);
     }
-    free(mas);
-    cudaFree(da);
+    free(a);
+    cudaFree(d_a);
  
     return 0;
 }
